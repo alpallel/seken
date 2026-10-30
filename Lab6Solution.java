@@ -1,8 +1,9 @@
-import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.StringTokenizer;
 
 /**
  * Lab 6 - MotoGP Tier List
@@ -18,6 +19,8 @@ import java.io.PrintWriter;
  */
 public class Lab6Solution {
 
+    private static InputReader in;
+    private static PrintWriter out;
     private static final char[] TIER_CHAR = {'S', 'A', 'B', 'C', 'D', 'E', 'F'};
 
     private static final class Node {
@@ -244,7 +247,7 @@ public class Lab6Solution {
         return c == 'S' ? 0 : c - 'A' + 1;
     }
 
-    private static void printRider(PrintWriter out, Node node) {
+    private static void printRider(Node node) {
         out.print(TIER_CHAR[node.tier]);
         out.print(' ');
         out.println(node.bp);
@@ -255,14 +258,14 @@ public class Lab6Solution {
     }
 
     public static void main(String[] args) {
-        FastScanner in = new FastScanner(System.in);
-        PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
+        in = new InputReader(System.in);
+        out = new PrintWriter(System.out);
 
         int n = in.nextInt();
         Node root = null;
 
         for (int i = 0; i < n; i++) {
-            char tierChar = in.nextChar();
+            char tierChar = in.next().charAt(0);
             int bp = in.nextInt();
             root = insert(root, new Node(tierOf(tierChar), bp));
         }
@@ -274,10 +277,10 @@ public class Lab6Solution {
         StringBuilder sb = new StringBuilder(64);
 
         for (int i = 0; i < q; i++) {
-            char operation = in.nextChar();
+            String operation = in.next();
 
-            if (operation == 'G') {
-                char tierChar = in.nextChar();
+            if (operation.equals("G")) {
+                char tierChar = in.next().charAt(0);
                 int bp = in.nextInt();
 
                 Node newNode = new Node(tierOf(tierChar), bp);
@@ -285,25 +288,25 @@ public class Lab6Solution {
                 root.parent = null;
 
                 if (newNode.parent == null) {
-                    printRider(out, newNode);
+                    printRider(newNode);
                 } else {
-                    printRider(out, newNode.parent);
+                    printRider(newNode.parent);
                 }
-            } else if (operation == 'R') {
-                char tierChar = in.nextChar();
+            } else if (operation.equals("R")) {
+                char tierChar = in.next().charAt(0);
                 int bp = in.nextInt();
 
                 Node target = find(root, tierOf(tierChar), bp);
                 if (target == null) {
                     out.println("-1");
                 } else {
-                    printRider(out, target);
+                    printRider(target);
                     root = delete(root, target.tier, target.bp);
                     if (root != null) {
                         root.parent = null;
                     }
                 }
-            } else if (operation == 'T') {
+            } else if (operation.equals("T")) {
                 if (root == null) {
                     out.println("-1");
                     continue;
@@ -339,61 +342,30 @@ public class Lab6Solution {
             }
         }
 
-        out.flush();
+        out.close();
     }
 
-    private static final class FastScanner {
-        private final InputStream in;
-        private final byte[] buffer = new byte[1 << 16];
-        private int pointer = 0;
-        private int length = 0;
+    static class InputReader {
+        private final BufferedReader reader;
+        private StringTokenizer tokenizer;
 
-        FastScanner(InputStream in) {
-            this.in = in;
+        InputReader(InputStream stream) {
+            reader = new BufferedReader(new InputStreamReader(stream), 32768);
         }
 
-        private int read() {
-            if (pointer >= length) {
+        String next() {
+            while (tokenizer == null || !tokenizer.hasMoreTokens()) {
                 try {
-                    length = in.read(buffer);
+                    tokenizer = new StringTokenizer(reader.readLine());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                pointer = 0;
-                if (length <= 0) {
-                    return -1;
-                }
             }
-            return buffer[pointer++];
-        }
-
-        char nextChar() {
-            int c;
-            do {
-                c = read();
-            } while (c != -1 && c <= ' ');
-            return (char) c;
+            return tokenizer.nextToken();
         }
 
         int nextInt() {
-            int c;
-            do {
-                c = read();
-            } while (c != -1 && c <= ' ');
-
-            boolean negative = false;
-            if (c == '-') {
-                negative = true;
-                c = read();
-            }
-
-            int value = 0;
-            while (c > ' ') {
-                value = value * 10 + (c - '0');
-                c = read();
-            }
-
-            return negative ? -value : value;
+            return Integer.parseInt(next());
         }
     }
 }
