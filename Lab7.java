@@ -10,16 +10,12 @@ public class Lab7 {
     private static InputReader in;
     private static PrintWriter out;
 
-    // priority[id] = current priority of server id.
     private static int[] priority;
 
-    // Free servers are kept in a max-heap ordered by (priority desc, id asc).
-    // freePos[id] is the index of server id inside freeHeap, or -1 when busy.
     private static int[] freeHeap;
     private static int[] freePos;
     private static int freeSize;
 
-    // Busy servers are kept in a min-heap ordered by (finishTime asc, id asc).
     private static int[] busyId;
     private static long[] busyFinish;
     private static int busySize;
@@ -37,7 +33,7 @@ public class Lab7 {
         }
         int m = in.nextInt();
 
-        int maxServers = n + m + 1; // at most one new server per query
+        int maxServers = n + m + 1;
         priority = new int[maxServers];
         freeHeap = new int[maxServers];
         freePos = new int[maxServers];
@@ -49,7 +45,6 @@ public class Lab7 {
         }
         serverCount = n;
 
-        // Each A query adds exactly one server to the busy heap.
         busyId = new int[m + 1];
         busyFinish = new long[m + 1];
 
@@ -79,7 +74,6 @@ public class Lab7 {
                 int p = in.nextInt();
 
                 if (freePos[server] == -1) {
-                    // Busy: only remember the new priority for when it finishes.
                     priority[server] = p;
                     out.println(1);
                 } else {
@@ -101,8 +95,7 @@ public class Lab7 {
     }
 
     // ---------- Free-server max-heap (indexed) ----------
-
-    // True when server a must be closer to the root than server b.
+    
     private static boolean higher(int a, int b) {
         if (priority[a] != priority[b]) {
             return priority[a] > priority[b];
@@ -145,7 +138,7 @@ public class Lab7 {
 
     private static void siftUpFree(int i) {
         while (i > 0) {
-            int parent = (i - 1) >>> 1;
+            int parent = (i - 1) / 2;
             if (!higher(freeHeap[i], freeHeap[parent])) {
                 break;
             }
